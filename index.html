@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>День года</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --accent: #007AFF;
+            --text: #1c1c1e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 320px; /* Идеально для мобильных */
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        #day-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: block;
+            margin: 10px 0;
+        }
+
+        .info {
+            font-size: 0.9rem;
+            color: #8e8e93;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <span id="day-number">--</span>
+    </div>
+
+    <script>
+        function updateDayOfYear() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            const dayOfYear = Math.floor(diff / oneDay);
+
+            // Вывод данных в HTML
+            document.getElementById('day-number').textContent = dayOfYear;
+            document.getElementById('current-year').textContent = `Год: ${now.getFullYear()}`;
+        }
+
+        // Запуск функции
+        updateDayOfYear();
+    </script>
+</body>
+</html>
