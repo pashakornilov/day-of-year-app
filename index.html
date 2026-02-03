@@ -3,77 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>День года</title>
+    <title>365: Путь Силы</title>
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --accent: #007AFF;
-            --text: #1c1c1e;
+            --bg: #000000;
+            --card-bg: #1a1a1a;
+            --text: #ffffff;
+            --accent: #ccff00; 
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
             color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            perspective: 1000px;
         }
 
-        .card {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .flip-card {
+            width: 330px;
+            height: 480px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .is-flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 40px;
+            padding: 45px 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .front { background: var(--card-bg); }
+        .back { 
+            color: #000; 
+            transform: rotateY(180deg); 
+            transition: background 0.8s ease;
+        }
+
+        .label { font-size: 0.75rem; letter-spacing: 3px; opacity: 0.5; text-transform: uppercase; font-weight: 700; text-align: center; }
+        .big-number { font-size: 10rem; font-weight: 900; line-height: 1; margin: 0; letter-spacing: -5px; }
+        .total-number { font-size: 5rem; font-weight: 900; line-height: 1; margin: 0; letter-spacing: -2px; }
+
+        .progress-container { width: 100%; background: rgba(255,255,255,0.1); height: 6px; border-radius: 10px; margin-top: 20px; }
+        .progress-bar { height: 100%; background: var(--accent); border-radius: 10px; transition: width 1s; }
+
+        .stat-box { text-align: center; width: 100%; }
+        .desc { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-top: 15px; letter-spacing: 1px; }
+        
+        .motivation-text {
+            font-size: 1rem;
+            font-weight: 600;
             text-align: center;
-            width: 90%;
-            max-width: 320px; /* Идеально для мобильных */
-        }
-
-        h1 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            opacity: 0.7;
-        }
-
-        #day-number {
-            font-size: 5rem;
-            font-weight: 800;
-            color: var(--accent);
-            display: block;
-            margin: 10px 0;
-        }
-
-        .info {
-            font-size: 0.9rem;
-            color: #8e8e93;
+            line-height: 1.5;
+            min-height: 5em;
+            display: flex;
+            align-items: center;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <span id="day-number">--</span>
+<div class="flip-card" onclick="this.classList.toggle('is-flipped')">
+    <div class="flip-card-inner">
+        <div class="front">
+            <div class="label">СЕГОДНЯШНЯЯ ЦЕЛЬ</div>
+            <h1 class="big-number" id="day-val">--</h1>
+            <div class="stat-box">
+                <div class="progress-container"><div class="progress-bar" id="p-bar"></div></div>
+                <p id="p-text" style="font-size: 0.75rem; margin-top: 12px; opacity: 0.4;">рассвет...</p>
+            </div>
+            <div class="label" style="font-size: 0.6rem; opacity: 0.3;">ПОСМОТРИ НА ПРОГРЕСС</div>
+        </div>
+
+        <div class="back" id="card-back">
+            <div class="label" style="color: #000; opacity: 0.6;">ТВОЙ ОБЩИЙ ПУТЬ</div>
+            <div class="stat-box">
+                <h1 id="total-sum-val" class="total-number">--</h1>
+                <div class="desc">ОТЖИМАНИЙ С НАЧАЛА ГОДА</div>
+            </div>
+            <div id="motivation" class="motivation-text"></div>
+            <div class="label" style="color: #000; font-size: 0.6rem; opacity: 0.5;">НАЗАД К ТРЕНИРОВКЕ</div>
+        </div>
     </div>
+</div>
 
-    <script>
-        function updateDayOfYear() {
-            const now = new Date();
-            const start = new Date(now.getFullYear(), 0, 0);
-            const diff = now - start;
-            const oneDay = 1000 * 60 * 60 * 24;
-            const dayOfYear = Math.floor(diff / oneDay);
+<script>
+    const phrases = {
+        start: [
+            "Маленькие шаги ведут к большим переменам.", "Важен каждый день. Сегодня — не исключение.", "Твой путь уникален. Просто продолжай.", "Дисциплина — это забота о себе будущем.", "Начни там, где ты есть. Используй то, что у тебя есть.", "Завтра ты скажешь себе «спасибо» за сегодня.", "Тихий прогресс лучше, чем громкое оправдание.", "Сила растет в тишине и постоянстве.", "Сегодняшние усилия — это залог завтрашней свободы.", "Просто сделай это для себя.", "Каждое повторение — это кирпичик в твоем фундаменте.", "Твое тело — твой единственный дом. Береги его.", "Верность себе начинается с малых дел.", "Не сравнивай свое начало с чьим-то триумфом.", "Сегодня ты сильнее, чем вчера, просто потому что не сдался.", "Действие побеждает страх.", "Секрет успеха в том, чтобы просто не останавливаться.", "Твои возможности безграничны, начни их открывать.", "Уважай свой темп, но не стой на месте.", "Ты — автор своей истории. Пиши ее делом.", "Фокусируйся на процессе, результат придет сам.", "Победа над собой — самая важная победа.", "Пусть твои дела говорят громче слов.", "Каждый день — это чистый лист.", "Твое будущее создается сегодня.", "Ты способен на большее, чем думаешь.", "Маленькая искра разжигает большое пламя.", "Цени момент борьбы, он делает тебя крепче.", "Стабильность — признак мастерства.", "Будь добрее к себе, но требуй дисциплины."
+        ],
+        middle: [
+            "Ты уже проделал огромную работу. Гордись этим.", "Когда станет трудно, вспомни, ради чего ты начал.", "Твоё тело становится сильнее с каждым разом.", "Движение — это жизнь. Ты справляешься отлично.", "Ты уже не тот человек, который начинал в январе.", "Твоя воля ковалась все эти дни.", "Инерция успеха теперь работает на тебя.", "Трудности — это просто способ стать еще крепче.", "Ты создаешь привычку, которая изменит твою жизнь.", "Результат уже виден в твоем зеркале и мыслях.", "Не ищи легких путей, ищи пути, которые ведут вверх.", "Держи ритм. Ты в отличной форме.", "Каждое движение приближает тебя к истинному себе.", "Ты — пример того, что такое настойчивость.", "Твоя энергия заряжает всё вокруг.", "Оставайся верным своей цели в любые времена.", "Сложные дни делают победы вкуснее.", "Ты доказал, что можешь быть стабильным.", "Преврати свои 'не могу' в 'я сделаю'.", "Твой прогресс — это сумма маленьких побед.", "Оставайся голодным до своих достижений.", "Ты строишь характер, а не только мышцы.", "Чувствуй силу внутри себя. Она безгранична.", "Путь на вершину всегда требует усилий.", "Ты — скала, о которую разбиваются сомнения.", "Продолжай идти, даже если кажется, что стоишь.", "Твоя настойчивость — твое главное оружие.", "Будь горд собой, но не останавливайся.", "Жизнь любит тех, кто не сдается.", "Ты на правильном пути. Просто верь."
+        ],
+        peak: [
+            "Посмотри, как много ты уже можешь. Это вдохновляет.", "Сила — это не только мышцы, но и верность слову.", "Ты строишь лучшую версию себя прямо сейчас.", "Никакие преграды не остановят твою волю.", "Твоя выносливость стала твоей второй натурой.", "Ты перешел черту, где большинство сдается.", "Мастерство — это когда трудно, но ты делаешь.", "Твое тело теперь — твой союзник, а не обуза.", "Каждый вдох наполнен твоей решимостью.", "Ты на пике своих возможностей, и это только начало.", "Твой дух стал крепче любого металла.", "Усталость временна, триумф — вечен.", "Ты научился находить радость в преодолении.", "Твоя дисциплина — это искусство.", "Гордись каждым шрамом от усилий.", "Ты больше не ищешь оправданий. Ты ищешь способы.", "Твоя трансформация заметна всем вокруг.", "Ты стал тем, на кого раньше смотрел с восхищением.", "Сила воли — это мышца, и ты ее натренировал.", "Будь вдохновением для самого себя.", "Ты — хозяин своего состояния.", "Когда тело просит отдыха, дух шепчет: 'еще немного'.", "Ты создаешь наследие для самого себя.", "Твой результат — это твоя подпись.", "Смелость — это продолжать, когда другие ушли.", "Ты нашел свой ритм в этом мире.", "Твоя энергия — это огонь, который греет тебя.", "Нет предела совершенству, и ты это знаешь.", "Ты — воплощение силы и баланса.", "Всё, что ты вложил, вернется к тебе сторицей."
+        ],
+        end: [
+            "Почти у цели. Твоя настойчивость поражает.", "Ты доказал себе, что невозможное — достижимо.", "Этот год запомнит твою силу духа.", "Финальный рывок. Ты — настоящий пример.", "Заверши этот год как чемпион своего мира.", "Ты сделал то, на что решаются единицы.", "Твоя история успеха близится к финалу главы.", "Посмотри назад: этот путь был пройден тобой.", "Твоя решимость — самое ценное приобретение года.", "Ты стал живым доказательством силы воли.", "Этот финиш станет началом чего-то еще большего.", "Ты заслужил каждое свое достижение.", "Чувствуй гордость. Ты был верен себе 365 дней.", "Твой характер теперь непоколебим.", "Ты — мастер своей судьбы.", "Заверши красиво. Каждое отжимание на счету.", "Ты стал сильнее не только телом, но и душой.", "Этот год изменил тебя навсегда.", "Финальные шаги — самые важные.", "Пусть твой успех греет тебя в новом году.", "Ты — человек слова. Это редкость и сила.", "Твоя трансформация завершена на 99%. Жми!", "Никто не сможет отнять у тебя этот результат.", "Ты прошел через всё и остался стоять.", "Твое упорство вдохновляет даже стены.", "Победа уже в твоих руках.", "Ты сделал этот год легендарным для себя.", "Последние усилия перед великим праздником.", "Ты — герой своего собственного пути.", "Запомни это чувство. Ты можешь всё."
+        ]
+    };
 
-            // Вывод данных в HTML
-            document.getElementById('day-number').textContent = dayOfYear;
-            document.getElementById('current-year').textContent = `Год: ${now.getFullYear()}`;
-        }
+    function updateTracker() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const dayOfYear = Math.floor((now - start) / 86400000);
+        const daysInYear = (now.getFullYear() % 4 === 0) ? 366 : 365;
+        
+        const sumToDate = (dayOfYear * (dayOfYear + 1)) / 2;
+        const progressPercent = (dayOfYear / daysInYear);
 
-        // Запуск функции
-        updateDayOfYear();
-    </script>
+        const hue = 120 - (progressPercent * 120);
+        
+        document.getElementById('day-val').textContent = dayOfYear;
+        document.getElementById('total-sum-val').textContent = sumToDate.toLocaleString();
+        document.getElementById('card-back').style.background = `hsl(${hue}, 85%, 60%)`;
+        
+        // Логика смены группы фраз по сезонам
+        let selectedGroup;
+        if (dayOfYear < 90) selectedGroup = phrases.start;
+        else if (dayOfYear < 180) selectedGroup = phrases.middle;
+        else if (dayOfYear < 270) selectedGroup = phrases.peak;
+        else selectedGroup = phrases.end;
+
+        // Ключевой момент: фраза меняется КАЖДЫЙ день (день 1 -> фраза 1, день 2 -> фраза 2)
+        // Если фраз меньше 30 (например в группе), берем остаток от деления
+        const phraseIndex = (dayOfYear - 1) % selectedGroup.length;
+        document.getElementById('motivation').textContent = selectedGroup[phraseIndex];
+
+        document.getElementById('p-bar').style.width = (progressPercent * 100).toFixed(1) + '%';
+        document.getElementById('p-text').textContent = `${(progressPercent * 100).toFixed(1)}% года пройдено`;
+    }
+
+    updateTracker();
+</script>
+
 </body>
 </html>
